@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, 
   Users, 
@@ -15,17 +15,21 @@ import {
   Award,
   Star,
   Eye,
-  UserCheck
+  UserCheck,
+  Layers,
+  Globe,
+  Inbox
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardStats } from '../../hooks/useFirebaseData';
 import { useCountAnimation } from '../../hooks/useCountAnimation';
 import SkillsManager from './SkillsManager';
 import ProjectsManager from './ProjectsManager';
-import TestimonialsManager from './TestimonialsManager';
 import ExperienceManager from './ExperienceManager';
+import ConfigManager from './ConfigManager';
+import MessagesManager from './MessagesManager';
 
-type TabType = 'overview' | 'skills' | 'projects' | 'testimonials' | 'experience' | 'settings';
+type TabType = 'overview' | 'messages' | 'skills' | 'projects' | 'testimonials' | 'experience' | 'config';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -34,11 +38,12 @@ const AdminDashboard: React.FC = () => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'skills', label: 'Skills', icon: Code },
+    { id: 'messages', label: 'Inbox', icon: Inbox },
     { id: 'projects', label: 'Projects', icon: Briefcase },
-    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+    { id: 'skills', label: 'Skills', icon: Code },
     { id: 'experience', label: 'Experience', icon: Award },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+    { id: 'config', label: 'General', icon: Settings },
   ];
 
   // Animated counters
@@ -66,219 +71,141 @@ const AdminDashboard: React.FC = () => {
   }, [statsLoading, activeTab]);
 
   const statsData = [
-    {
-      label: 'Total Skills',
-      value: skillsCount.count,
-      change: '+2',
-      changeType: 'positive',
-      icon: Code,
-      color: 'bg-blue-500'
-    },
-    {
-      label: 'Total Projects',
-      value: projectsCount.count,
-      change: '+1',
-      changeType: 'positive',
-      icon: FolderOpen,
-      color: 'bg-green-500'
-    },
-    {
-      label: 'Testimonials',
-      value: testimonialsCount.count,
-      change: '+3',
-      changeType: 'positive',
-      icon: MessageSquare,
-      color: 'bg-purple-500'
-    },
-    {
-      label: 'Experience',
-      value: experienceCount.count,
-      change: '+1',
-      changeType: 'positive',
-      icon: Award,
-      color: 'bg-orange-500'
-    },
-    {
-      label: 'Portfolio Views',
-      value: viewsCount.count.toLocaleString(),
-      change: '+12%',
-      changeType: 'positive',
-      icon: Eye,
-      color: 'bg-indigo-500'
-    },
-    {
-      label: 'Active Sessions',
-      value: sessionsCount.count,
-      change: '+5',
-      changeType: 'positive',
-      icon: Activity,
-      color: 'bg-pink-500'
-    },
-    {
-      label: 'Featured Projects',
-      value: featuredCount.count,
-      change: '+1',
-      changeType: 'positive',
-      icon: Star,
-      color: 'bg-yellow-500'
-    },
-    {
-      label: 'Average Rating',
-      value: ratingCount.count.toFixed(1),
-      change: '+0.2',
-      changeType: 'positive',
-      icon: UserCheck,
-      color: 'bg-emerald-500'
-    }
+    { label: 'Total Projects', value: projectsCount.count, change: '+1', changeType: 'positive', icon: FolderOpen, color: 'text-zinc-900 dark:text-white' },
+    { label: 'Total Skills', value: skillsCount.count, change: '+2', changeType: 'positive', icon: Code, color: 'text-zinc-900 dark:text-white' },
+    { label: 'Testimonials', value: testimonialsCount.count, change: '+3', changeType: 'positive', icon: MessageSquare, color: 'text-zinc-900 dark:text-white' },
+    { label: 'Portfolio Views', value: viewsCount.count.toLocaleString(), change: '+12%', changeType: 'positive', icon: Eye, color: 'text-zinc-900 dark:text-white' },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-8">
+          <div className="space-y-4 md:space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {statsData.map((stat, index) => (
                 <motion.div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ 
-                    delay: index * 0.1,
-                    duration: 0.5,
-                    type: "spring",
-                    stiffness: 100
-                  }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    transition: { duration: 0.2 }
-                  }}
-                  className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white dark:bg-zinc-800/50 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-700/50 backdrop-blur-sm"
                 >
-                  {/* Background gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-slate-50/50 dark:to-slate-700/20"></div>
-                  
-                  <div className="relative">
-                    <div className="flex items-center justify-between mb-4">
-                      <motion.div 
-                        className={`p-3 rounded-lg ${stat.color} text-white`}
-                        whileHover={{ rotate: 5 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <stat.icon className="h-6 w-6" />
-                      </motion.div>
-                      <motion.span 
-                        className={`text-sm font-medium ${
-                          stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                        }`}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 + 0.3 }}
-                      >
-                        {stat.change}
-                      </motion.span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-700/50 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-500">
+                      <stat.icon className="h-5 w-5" />
                     </div>
-                    <motion.h3 
-                      className="text-2xl font-bold text-slate-900 dark:text-white mb-1"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.1 + 0.2 }}
-                    >
-                      {stat.value}
-                    </motion.h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      {stat.label}
-                    </p>
+                    {stat.change && (
+                       <span className="text-[10px] font-bold text-green-500 tracking-wider">
+                         {stat.change}
+                       </span>
+                    )}
                   </div>
+                  <h3 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight mb-1">
+                    {stat.value}
+                  </h3>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
+                    {stat.label}
+                  </p>
                 </motion.div>
               ))}
             </div>
 
-            {/* Quick Actions */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-              className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700"
-            >
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { label: 'Add New Skill', tab: 'skills', color: 'blue', icon: Code },
-                  { label: 'Add New Project', tab: 'projects', color: 'green', icon: FolderOpen },
-                  { label: 'Add Testimonial', tab: 'testimonials', color: 'purple', icon: MessageSquare },
-                  { label: 'Add Experience', tab: 'experience', color: 'orange', icon: Award }
-                ].map((action, index) => (
-                  <motion.button
-                    key={action.label}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setActiveTab(action.tab as TabType)}
-                    className={`flex items-center p-4 bg-${action.color}-50 dark:bg-${action.color}-900/20 border border-${action.color}-200 dark:border-${action.color}-800 rounded-lg hover:bg-${action.color}-100 dark:hover:bg-${action.color}-900/30 transition-all duration-200`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 + index * 0.1 }}
-                  >
-                    <action.icon className={`h-5 w-5 text-${action.color}-600 dark:text-${action.color}-400 mr-3`} />
-                    <span className={`text-${action.color}-700 dark:text-${action.color}-300 font-medium text-sm`}>
-                      {action.label}
-                    </span>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
+            {/* Main Content Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+              {/* Left Column: Activity & Quick Actions */}
+              <div className="lg:col-span-8 space-y-6 md:space-y-8">
+                {/* Needs Attention */}
+                <motion.div 
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
+                   transition={{ delay: 0.3 }}
+                   className="bg-zinc-900 dark:bg-zinc-800 p-8 rounded-3xl border border-zinc-800 relative overflow-hidden group"
+                >
+                  <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                    <Activity className="w-32 h-32 text-white" />
+                  </div>
+                  <div className="relative z-10">
+                    <h2 className="text-2xl font-bold text-white tracking-tight mb-2">Systems Online.</h2>
+                    <p className="text-zinc-400 text-sm mb-8 font-light max-w-sm">
+                      Your portfolio is healthy. You have {testimonialsCount.count > 0 ? 'active' : 'no'} testimonials and {featuredCount.count} featured projects.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      <button 
+                        onClick={() => setActiveTab('testimonials')}
+                        className="px-6 py-3 bg-white text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-zinc-200 transition-colors"
+                      >
+                        Review Testimonials
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('projects')}
+                        className="px-6 py-3 bg-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-zinc-700 hover:bg-zinc-700 transition-colors"
+                      >
+                        Update Projects
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
 
-            {/* Recent Activity */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2, duration: 0.5 }}
-              className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700"
-            >
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
-                Recent Activity
-              </h2>
-              <div className="space-y-4">
-                {[
-                  { action: 'Added new skill', item: 'React Native', time: '2 hours ago', type: 'skill' },
-                  { action: 'Updated project', item: 'E-commerce App', time: '1 day ago', type: 'project' },
-                  { action: 'New testimonial', item: 'From Sarah Johnson', time: '2 days ago', type: 'testimonial' },
-                  { action: 'Added experience', item: 'Senior Developer Role', time: '3 days ago', type: 'experience' },
-                ].map((activity, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.3 + index * 0.1 }}
-                    whileHover={{ x: 5 }}
-                  >
-                    <div className={`p-2 rounded-lg mr-4 ${
-                      activity.type === 'skill' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                      activity.type === 'project' ? 'bg-green-100 dark:bg-green-900/30' :
-                      activity.type === 'testimonial' ? 'bg-purple-100 dark:bg-purple-900/30' :
-                      'bg-orange-100 dark:bg-orange-900/30'
-                    }`}>
-                      {activity.type === 'skill' && <Code className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-                      {activity.type === 'project' && <FolderOpen className="h-4 w-4 text-green-600 dark:text-green-400" />}
-                      {activity.type === 'testimonial' && <MessageSquare className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
-                      {activity.type === 'experience' && <Award className="h-4 w-4 text-orange-600 dark:text-orange-400" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-slate-900 dark:text-white font-medium">
-                        {activity.action}: <span className="text-blue-600 dark:text-blue-400">{activity.item}</span>
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm">{activity.time}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                {/* Activity Feed */}
+                <div className="bg-white dark:bg-zinc-800/50 p-8 rounded-3xl border border-zinc-200 dark:border-zinc-700/50">
+                   <div className="flex items-center justify-between mb-10">
+                      <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Recent Activity</h3>
+                      <button className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-zinc-900 dark:hover:text-white transition-colors">View All</button>
+                   </div>
+                   <div className="space-y-6">
+                      {[
+                        { action: 'Technical Update', item: 'Modified Skill Model', time: 'Just now', icon: Zap, color: 'text-yellow-500' },
+                        { action: 'Review Pending', item: 'Testimonial Moderation Enabled', time: '2 hours ago', icon: MessageSquare, color: 'text-zinc-400' },
+                        { action: 'System Sync', item: 'Config Engine Updated', time: '1 day ago', icon: Briefcase, color: 'text-zinc-400' },
+                      ].map((activity, i) => (
+                        <div key={i} className="flex items-start space-x-6">
+                           <div className={`mt-1 ${activity.color}`}>
+                              <activity.icon className="w-4 h-4" />
+                           </div>
+                           <div className="flex-1 pb-6 border-b border-zinc-100 dark:border-zinc-700/50 last:border-0 last:pb-0">
+                              <p className="text-sm text-zinc-900 dark:text-white font-medium mb-1">
+                                {activity.action}: <span className="font-light text-zinc-500">{activity.item}</span>
+                              </p>
+                              <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">{activity.time}</p>
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
               </div>
-            </motion.div>
+
+              {/* Right Column: Tools & Quick Stats */}
+              <div className="lg:col-span-4 space-y-8">
+                 <div className="bg-white dark:bg-zinc-800/50 p-8 rounded-3xl border border-zinc-200 dark:border-zinc-700/50">
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight mb-8">Quick Management</h3>
+                    <div className="space-y-4">
+                       {[
+                         { label: 'Global Settings', tab: 'config', icon: Settings },
+                         { label: 'Experience Hub', tab: 'experience', icon: Award },
+                         { label: 'Technical Skills', tab: 'skills', icon: Code },
+                       ].map((tool) => (
+                         <button
+                           key={tool.label}
+                           onClick={() => setActiveTab(tool.tab as TabType)}
+                           className="w-full flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-700/30 rounded-2xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-600 transition-all group"
+                         >
+                           <div className="flex items-center space-x-4">
+                              <tool.icon className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
+                              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white">{tool.label}</span>
+                           </div>
+                           <TrendingUp className="w-3 h-3 text-zinc-300 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0" />
+                         </button>
+                       ))}
+                    </div>
+                 </div>
+              </div>
+            </div>
           </div>
         );
+      case 'messages':
+        return <MessagesManager />;
       case 'skills':
         return <SkillsManager />;
       case 'projects':
@@ -287,92 +214,101 @@ const AdminDashboard: React.FC = () => {
         return <TestimonialsManager />;
       case 'experience':
         return <ExperienceManager />;
-      case 'settings':
-        return (
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
-              Settings
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400">
-              Settings panel coming soon...
-            </p>
-          </div>
-        );
+      case 'config':
+        return <ConfigManager />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                Admin Dashboard
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                Welcome, {user?.email}
-              </span>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={logout}
-                className="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+    <div className="min-h-screen bg-bg transition-colors duration-300">
+      {/* Integrated Minimal Sidebar + Main */}
+      <div className="flex h-screen overflow-hidden">
+        {/* Sidebar */}
+        <aside className="hidden lg:flex flex-col w-72 bg-surface border-r border-border">
+          <div className="p-10">
+            <h1 className="text-xl font-bold text-text-primary tracking-tighter flex items-center">
+              <Code className="mr-3 w-5 h-5 text-text-muted" /> Admin.
+            </h1>
+          </div>
+          
+          <nav className="flex-1 px-6 space-y-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`w-full flex items-center px-6 py-4 rounded-2xl transition-all duration-300 text-sm ${
+                  activeTab === tab.id
+                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl shadow-zinc-500/10'
+                    : 'text-text-muted hover:text-text-primary hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                }`}
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </header>
+                <tab.icon className={`h-4 w-4 mr-4 ${activeTab === tab.id ? 'opacity-100' : 'opacity-40'}`} />
+                <span className="font-medium tracking-tight">{tab.label}</span>
+              </button>
+            ))}
+          </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className="lg:w-64 flex-shrink-0">
-            <nav className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-              <div className="space-y-2">
-                {tabs.map((tab, index) => (
-                  <motion.button
-                    key={tab.id}
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setActiveTab(tab.id as TabType)}
-                    className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                      activeTab === tab.id
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                    }`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <tab.icon className="h-5 w-5 mr-3" />
-                    {tab.label}
-                  </motion.button>
-                ))}
-              </div>
-            </nav>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+          <div className="p-8 border-t border-border mt-auto">
+            <button
+              onClick={logout}
+              className="w-full flex items-center px-6 py-4 rounded-xl text-text-muted hover:text-red-500 hover:bg-red-500/5 transition-all duration-300 text-sm font-medium"
             >
-              {renderContent()}
-            </motion.div>
+              <LogOut className="h-4 w-4 mr-4 opacity-40" />
+              Sign Out
+            </button>
           </div>
-        </div>
+        </aside>
+
+        {/* Main Area */}
+        <main className="flex-1 overflow-y-auto bg-bg custom-scrollbar">
+          <header className="sticky top-0 z-40 bg-bg/80 backdrop-blur-md border-b border-border h-24 flex items-center">
+             <div className="w-full max-w-7xl mx-auto px-10 flex items-center justify-between">
+                <div>
+                   <h2 className="text-lg font-bold text-text-primary tracking-tight">
+                     {tabs.find(t => t.id === activeTab)?.label}
+                   </h2>
+                   <p className="text-[10px] font-bold text-text-faint uppercase tracking-widest mt-1">Management Console</p>
+                </div>
+                
+                <div className="flex items-center space-x-6">
+                   <a 
+                     href="/" 
+                     target="_blank"
+                     className="px-5 py-2.5 rounded-full border border-border text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-text-primary hover:border-text-muted transition-all flex items-center"
+                   >
+                     <Eye className="w-3 h-3 mr-2" /> View Site
+                   </a>
+                   <div className="hidden md:flex items-center space-x-4 pl-6 border-l border-border">
+                      <div className="text-right">
+                         <p className="text-xs font-bold text-text-primary">{user?.email?.split('@')[0]}</p>
+                         <p className="text-[10px] text-text-faint font-medium">Administrator</p>
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-surface border border-border overflow-hidden p-1">
+                         <div className="w-full h-full rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-zinc-500">
+                            <span className="text-xs font-bold uppercase">{user?.email?.[0]}</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </header>
+
+          <div className="p-10 max-w-7xl mx-auto">
+             <AnimatePresence mode="wait">
+               <motion.div
+                 key={activeTab}
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -10 }}
+                 transition={{ duration: 0.3 }}
+               >
+                 {renderContent()}
+               </motion.div>
+             </AnimatePresence>
+          </div>
+        </main>
       </div>
     </div>
   );

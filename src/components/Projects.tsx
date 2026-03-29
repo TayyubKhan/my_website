@@ -1,151 +1,82 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { ExternalLink, Github, Smartphone, Users, Star, Calendar, Filter, Search, Eye } from 'lucide-react';
-import { useProjects } from '../hooks/useFirebaseData';
-import { ProjectsLoadingGrid, ErrorState } from './LoadingStates';
+import { Github, ExternalLink, ArrowUpRight } from 'lucide-react';
+import { ProjectsLoadingGrid } from './LoadingStates';
+import { useProjects, Project } from '../hooks/useFirebaseData';
+import { getTagColorClasses } from '../utils/colors';
+import ProjectModal from './ProjectModal';
 
-const Projects: React.FC = () => {
-  const { projects, loading, error, refetch } = useProjects();
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-  
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+const categories = ["All", "Mobile App", "Security", "Education"];
 
-  const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
-  
-  const filteredProjects = projects.filter(project => {
-    const matchesCategory = selectedCategory === 'All' || project.category === selectedCategory;
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFeatured = !showFeaturedOnly || project.featured;
-    
-    return matchesCategory && matchesSearch && matchesFeatured;
-  });
+const Projects = () => {
+  const { projects, loading } = useProjects();
+  const [filter, setFilter] = useState("All");
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+
+  const filteredProjects = filter === "All" 
+    ? projects 
+    : projects.filter(p => p.category === filter);
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.175, 0.885, 0.32, 1.275]
-      }
-    }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
-  if (error) {
-    return (
-      <section id="projects" className="py-24 bg-slate-50 dark:bg-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ErrorState message={error} onRetry={refetch} type="projects" />
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section id="projects" className="py-24 bg-slate-50 dark:bg-slate-800 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10"></div>
-      <div className="absolute top-1/4 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mb-4">
-            <Smartphone className="h-4 w-4 mr-2" />
-            Portfolio Showcase
+    <section id="projects" className="py-32 bg-bg transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Headline Area */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+          <div className="text-left">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-text-muted text-sm tracking-widest uppercase mb-6"
+            >
+              Selected Works
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-3xl md:text-5xl lg:text-6xl font-display font-medium text-text-primary leading-[1.15] max-w-2xl"
+            >
+              Building digital products with{' '}
+              <span className="italic text-text-muted" style={{ fontStyle: 'italic' }}>meaning</span> and{' '}
+              <span className="italic text-text-muted" style={{ fontStyle: 'italic' }}>impact</span>.
+            </motion.h2>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-            Featured Projects
-          </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Here are some of the mobile applications I've built using Flutter and modern technologies
-          </p>
-        </motion.div>
-
-        {/* Filters and Search */}
-        {!loading && !error && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-12"
+          
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex flex-wrap gap-x-8 gap-y-4"
           >
-            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
-              {/* Search */}
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search projects..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-              </div>
-
-              {/* Category Filter */}
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      selectedCategory === category
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-
-              {/* Featured Toggle */}
-              <div className="flex items-center">
-                <button
-                  onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
-                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    showFeaturedOnly
-                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600'
-                  }`}
-                >
-                  <Star className="h-4 w-4 mr-2" />
-                  Featured Only
-                </button>
-              </div>
-            </div>
-
-            {/* Results Count */}
-            <div className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-              Showing {filteredProjects.length} of {projects.length} projects
-            </div>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`text-[10px] font-bold uppercase tracking-widest transition-all pb-2 border-b-2 ${
+                  filter === cat 
+                    ? 'border-indigo-500/50 text-indigo-400' 
+                    : 'border-transparent text-text-faint hover:text-text-muted'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </motion.div>
-        )}
+        </div>
 
         {loading ? (
           <ProjectsLoadingGrid />
@@ -155,136 +86,77 @@ const Projects: React.FC = () => {
             variants={containerVariants}
             initial="hidden"
             animate={inView ? "visible" : "hidden"}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20"
           >
-            <AnimatePresence mode="wait">
-              {filteredProjects.map((project, index) => (
+            <AnimatePresence mode="popLayout">
+              {filteredProjects.map((project) => (
                 <motion.div
                   key={project.id}
                   variants={itemVariants}
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ 
-                    y: -12,
-                    transition: { duration: 0.3, ease: "easeOut" }
-                  }}
-                  className="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-700 relative"
+                  className="group flex flex-col h-full bg-surface/30 backdrop-blur-sm rounded-2xl border border-border hover:border-border-hover transition-all duration-500 hover:-translate-y-1 shadow-sm hover:shadow-xl overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedProject(project)}
                 >
-                  {/* Featured Badge */}
-                  {project.featured && (
-                    <div className="absolute top-4 left-4 z-10">
-                      <div className="flex items-center px-3 py-1 bg-yellow-500 text-white text-xs font-medium rounded-full">
-                        <Star className="h-3 w-3 mr-1" />
-                        Featured
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Project Image */}
-                  <div className="relative overflow-hidden h-48">
+                  {/* Image Container */}
+                  <div className="relative overflow-hidden aspect-[4/3] bg-bg flex items-center justify-center p-6 border-b border-border transition-colors duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-surface to-bg opacity-50 z-0" />
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="relative z-10 w-full h-full object-contain filter drop-shadow-xl group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Hover Actions */}
-                    <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                      <div className="flex space-x-2">
-                        <motion.a
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          href={project.links.github}
-                          className="p-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-colors"
-                        >
-                          <Github className="h-5 w-5" />
-                        </motion.a>
-                        <motion.a
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          href={project.links.live}
-                          className="p-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-colors"
-                        >
-                          <ExternalLink className="h-5 w-5" />
-                        </motion.a>
-                        {project.links.demo && (
-                          <motion.a
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            href={project.links.demo}
-                            className="p-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-colors"
-                          >
-                            <Eye className="h-5 w-5" />
-                          </motion.a>
-                        )}
-                      </div>
-                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
                   
-                  {/* Project Content */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-xl font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {/* Content */}
+                  <div className="flex flex-col flex-1 p-6 lg:p-8">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-text-primary tracking-tight group-hover:text-blue-400 transition-colors">
                         {project.title}
                       </h3>
-                      <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {project.createdAt.getFullYear()}
+                      <div className="flex space-x-4">
+                        <a 
+                          href={project.links.github} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-text-faint hover:text-text-primary transition-colors p-1"
+                          title="View Code"
+                        >
+                          <Github className="w-4 h-4" />
+                        </a>
+                        <a 
+                          href={project.links.live} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-text-faint hover:text-text-primary transition-colors p-1"
+                          title="Live Demo"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
                       </div>
                     </div>
                     
-                    <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed line-clamp-3">
-                      {project.description}
+                    <p className="text-text-secondary text-sm leading-relaxed mb-6 font-light line-clamp-3">
+                      {project.title === 'Linkup' ? 'Engineered a low-latency P2P mesh network using Bluetooth connectivity and SQLite for offline persistence, enabling communication in zero-coverage environments.' :
+                       project.title === 'Qudwa' ? 'Integrated LLM-based chatbots and encrypted Firebase real-time sync to provide a secure, AI-driven educational experience for 5k+ active users.' :
+                       project.description}
                     </p>
                     
-                    {/* Tech Tags */}
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {project.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {project.tags.length > 3 && (
-                          <span className="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full">
-                            +{project.tags.length - 3}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* Key Features */}
-                      <div className="space-y-1">
-                        {project.features.slice(0, 3).map((feature) => (
-                          <div key={feature} className="flex items-center text-xs text-slate-600 dark:text-slate-400">
-                            <div className="w-1 h-1 bg-blue-500 rounded-full mr-2 flex-shrink-0" />
-                            <span className="truncate">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-2 mb-8 mt-auto">
+                      {project.tags.map(tag => (
+                        <span key={tag} className={`text-[10px] font-medium px-2 py-1 border rounded uppercase tracking-wider transition-colors ${getTagColorClasses(tag)}`}>
+                          #{tag.replace(/\s+/g, '')}
+                        </span>
+                      ))}
                     </div>
-                    
-                    {/* Project Metrics */}
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center space-x-4 text-sm text-slate-600 dark:text-slate-400">
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          {project.metrics.users}
-                        </div>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                          {project.metrics.rating}
-                        </div>
-                      </div>
-                      <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
-                        <Smartphone className="h-4 w-4 mr-1" />
-                        {project.metrics.downloads}
-                      </div>
+
+                    <div className="pt-6 border-t border-border flex items-center justify-between mt-auto">
+                       <span className="text-[10px] font-bold text-text-faint uppercase tracking-widest">{project.category}</span>
+                       <span className="flex items-center text-[10px] font-bold text-blue-400/90 uppercase tracking-widest opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                         View Details <ArrowUpRight className="ml-1 w-3 h-3" />
+                       </span>
                     </div>
                   </div>
                 </motion.div>
@@ -292,36 +164,13 @@ const Projects: React.FC = () => {
             </AnimatePresence>
           </motion.div>
         )}
-
-        {/* No Results */}
-        {!loading && !error && filteredProjects.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
-          >
-            <div className="w-24 h-24 mx-auto mb-6 text-slate-400">
-              <Search className="w-full h-full" />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-              No projects found
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              Try adjusting your search criteria or filters
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('All');
-                setShowFeaturedOnly(false);
-              }}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
-            >
-              Clear Filters
-            </button>
-          </motion.div>
-        )}
       </div>
+
+      <ProjectModal 
+        project={selectedProject} 
+        isOpen={selectedProject !== null} 
+        onClose={() => setSelectedProject(null)} 
+      />
     </section>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Star, User, Building, MessageSquare, CheckCircle } from 'lucide-react';
+import { Send, Star, CheckCircle } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
@@ -27,7 +27,7 @@ const TestimonialForm: React.FC = () => {
         ...formData,
         featured: false,
         order: 0,
-        status: 'pending', // Admin can approve/reject
+        status: 'pending',
         submittedAt: serverTimestamp(),
         createdAt: serverTimestamp()
       });
@@ -35,17 +35,8 @@ const TestimonialForm: React.FC = () => {
       toast.success('Thank you! Your testimonial has been submitted for review.');
       setIsSubmitted(true);
       
-      // Reset form after 3 seconds
       setTimeout(() => {
-        setFormData({
-          name: '',
-          position: '',
-          company: '',
-          email: '',
-          image: '',
-          rating: 5,
-          text: ''
-        });
+        setFormData({ name: '', position: '', company: '', email: '', image: '', rating: 5, text: '' });
         setIsSubmitted(false);
       }, 3000);
     } catch (error) {
@@ -63,31 +54,33 @@ const TestimonialForm: React.FC = () => {
     }));
   };
 
+  const inputClasses = "w-full px-0 py-4 bg-transparent border-b border-surface text-text-primary placeholder:text-text-faint focus:border-text-secondary focus:outline-none transition-colors text-sm";
+
   if (isSubmitted) {
     return (
-      <section id="testimonial-form" className="py-24 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/10 dark:to-blue-900/10">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="testimonial-form" className="py-32 bg-surface transition-colors duration-300">
+        <div className="max-w-2xl mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center bg-white dark:bg-slate-800 rounded-2xl p-12 shadow-xl border border-slate-200 dark:border-slate-700"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-16 h-16 border border-border rounded-full flex items-center justify-center mx-auto mb-8"
             >
-              <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
+              <CheckCircle className="h-8 w-8 text-text-primary" />
             </motion.div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-              Thank You!
+            <h2 className="text-3xl font-display font-medium text-text-primary mb-4">
+              Thank You.
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 mb-6">
-              Your testimonial has been submitted successfully. I'll review it and it will appear on the website soon.
+            <p className="text-text-muted mb-6">
+              Your testimonial has been submitted. I'll review it and it will appear on the site soon.
             </p>
-            <div className="text-sm text-slate-500 dark:text-slate-400">
-              Redirecting back to form in a few seconds...
+            <div className="text-text-faint text-sm">
+              Redirecting back in a few seconds...
             </div>
           </motion.div>
         </div>
@@ -96,201 +89,97 @@ const TestimonialForm: React.FC = () => {
   }
 
   return (
-    <section id="testimonial-form" className="py-24 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10"></div>
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
-
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <section id="testimonial-form" className="py-32 bg-surface transition-colors duration-300">
+      <div className="max-w-2xl mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="mb-16 text-center"
         >
-          <div className="inline-flex items-center px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mb-4">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Share Your Experience
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-            Leave a Testimonial
+          <h2 className="text-4xl md:text-5xl font-display font-medium text-text-primary mb-4">
+            Leave a Testimonial.
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
-            Worked with me? I'd love to hear about your experience! Your feedback helps me improve and helps others understand the value I provide.
+          <p className="text-text-muted text-sm tracking-widest uppercase mb-6">Share Your Experience</p>
+          <p className="text-text-muted max-w-lg mx-auto">
+            Worked with me? Your feedback helps me grow and helps others understand the value I provide.
           </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-slate-700"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Personal Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Your Name *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Your full name"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="your@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="position" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Your Position *
-                </label>
-                <input
-                  type="text"
-                  id="position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="e.g., Product Manager"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Company
-                </label>
-                <div className="relative">
-                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-                  <input
-                    type="text"
-                    id="company"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Your company name"
-                  />
-                </div>
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required className={inputClasses} placeholder="Your Name *" />
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required className={inputClasses} placeholder="Email *" />
+              <input type="text" id="position" name="position" value={formData.position} onChange={handleChange} required className={inputClasses} placeholder="Your Position *" />
+              <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} className={inputClasses} placeholder="Company" />
             </div>
 
-            {/* Profile Image */}
-            <div>
-              <label htmlFor="image" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Profile Image URL (Optional)
-              </label>
-              <input
-                type="url (you can copy the link of your image from google account)"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                placeholder="https://your-google-account-image-url.com"
-              />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Optional: Add a link to your professional photo
-              </p>
-            </div>
+            <input type="url" id="image" name="image" value={formData.image} onChange={handleChange} className={inputClasses} placeholder="Profile Image URL (Optional)" />
 
             {/* Rating */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                How would you rate your experience? *
+            <div className="py-6">
+              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-4">
+                Rating
               </label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 {[1, 2, 3, 4, 5].map((rating) => (
-                  <motion.button
+                  <button
                     key={rating}
                     type="button"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
                     onClick={() => setFormData({ ...formData, rating })}
-                    className="p-1 transition-transform"
+                    className="p-1 transition-colors"
                   >
                     <Star
-                      className={`h-8 w-8 ${
+                      className={`h-6 w-6 ${
                         rating <= formData.rating
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-slate-300 dark:text-slate-600'
+                          ? 'text-text-primary fill-current'
+                          : 'text-surface-alt'
                       } transition-colors`}
                     />
-                  </motion.button>
+                  </button>
                 ))}
-                <span className="ml-4 text-sm text-slate-600 dark:text-slate-400">
-                  {formData.rating} out of 5 stars
+                <span className="ml-4 text-sm text-text-muted">
+                  {formData.rating}/5
                 </span>
               </div>
             </div>
 
-            {/* Testimonial Text */}
-            <div>
-              <label htmlFor="text" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Your Testimonial *
-              </label>
-              <textarea
-                id="text"
-                name="text"
-                value={formData.text}
-                onChange={handleChange}
-                required
-                rows={6}
-                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
-                placeholder="Share your experience working with me. What did you like about the collaboration? How did I help achieve your goals?"
-              />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Please be specific about the project and your experience
+            <textarea
+              id="text"
+              name="text"
+              value={formData.text}
+              onChange={handleChange}
+              required
+              rows={5}
+              className={`${inputClasses} resize-none`}
+              placeholder="Share your experience working with me..."
+            />
+
+            {/* Privacy */}
+            <div className="py-6">
+              <p className="text-text-faint text-xs">
+                <strong className="text-text-muted">Privacy:</strong> Your testimonial will be reviewed before publishing. Your email will not be displayed publicly.
               </p>
             </div>
 
-            {/* Privacy Notice */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Privacy Notice:</strong> Your testimonial will be reviewed before being published. 
-                Your email address will not be displayed publicly and will only be used to contact you if needed.
-              </p>
-            </div>
-
-            {/* Submit Button */}
             <motion.button
               type="submit"
               disabled={isSubmitting}
-              whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-              whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-400 disabled:to-blue-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+              whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
+              whileTap={{ scale: isSubmitting ? 1 : 0.99 }}
+              className="w-full bg-accent text-bg font-medium py-4 px-6 text-sm tracking-wide hover:bg-accent-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="w-4 h-4 border-2 border-bg border-t-transparent rounded-full animate-spin mr-2" />
               ) : (
-                <Send className="h-5 w-5 mr-2" />
+                <Send className="h-4 w-4 mr-3" />
               )}
               {isSubmitting ? 'Submitting...' : 'Submit Testimonial'}
             </motion.button>

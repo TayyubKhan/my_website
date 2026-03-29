@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import Skills from './components/Skills';
 import Projects from './components/Projects';
 import About from './components/About';
 import Testimonials from './components/Testimonials';
@@ -15,25 +14,34 @@ import ProtectedRoute from './components/admin/ProtectedRoute';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { useScrollspy } from './hooks/useScrollspy';
+import CustomCursor from './components/CustomCursor';
+import ScrollProgress from './components/ScrollProgress';
 
 const PortfolioApp: React.FC = () => {
   const [activeSection, setActiveSection] = useState('hero');
   
   useScrollspy({
-    sectionIds: ['hero', 'skills', 'projects', 'about', 'testimonials', 'testimonial-form', 'contact'],
+    sectionIds: ['home', 'about', 'projects', 'testimonials', 'testimonial-form', 'contact'],
     onActiveChange: setActiveSection,
   });
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
+    <div className="min-h-screen bg-bg transition-colors duration-300">
       <Header activeSection={activeSection} />
       <main>
+        {/* 1. Hero: The hook */}
         <Hero />
-        <Skills />
-        <Projects />
+        {/* 2. About: Value proposition */}
+        <div className="section-divider" />
         <About />
+        {/* 3. Projects: Proof of work */}
+        <div className="section-divider" />
+        <Projects />
+        {/* 4. Testimonials: Social proof */}
+        <div className="section-divider" />
         <Testimonials />
-        <TestimonialForm />
+        {/* 5. Contact: CTA */}
+        <div className="section-divider" />
         <Contact />
       </main>
       <Footer />
@@ -47,6 +55,8 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="min-h-screen">
+            <CustomCursor />
+            <ScrollProgress />
             <Routes>
               <Route path="/" element={<PortfolioApp />} />
               <Route 
@@ -57,6 +67,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/feedback" element={<TestimonialForm />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster 
@@ -64,9 +75,9 @@ function App() {
               toastOptions={{
                 duration: 4000,
                 style: {
-                  background: 'var(--toast-bg)',
-                  color: 'var(--toast-color)',
-                  border: '1px solid var(--toast-border)',
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-text)',
+                  border: '1px solid var(--color-border)',
                 },
               }}
             />

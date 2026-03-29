@@ -1,99 +1,115 @@
-import React from 'react';
-import { Moon, Sun, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
-interface HeaderProps {
-  activeSection: string;
-}
-
-const Header: React.FC<HeaderProps> = ({ activeSection }) => {
+const Header = ({ activeSection }: { activeSection?: string }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navigation = [
-    { name: 'Home', href: '#hero' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Projects', href: '#projects' },
+    { name: 'Home', href: '#home' },
     { name: 'About', href: '#about' },
-    { name: 'Testimonials', href: '#testimonials' },
-    { name: 'Share Review', href: '#testimonial-form' },
+    { name: 'Projects', href: '#projects' },
     { name: 'Contact', href: '#contact' },
   ];
 
-  const scrollToSection = (href: string) => {
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
     const element = document.querySelector(href);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
     }
-    setIsMenuOpen(false);
   };
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
-            <span className="text-xl font-bold text-slate-900 dark:text-white">
-              Tayyub Khan
-            </span>
+    <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'py-4' : 'py-6'}`}>
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="glass-nav rounded-full px-6 py-3 flex items-center justify-between">
+          <div className="text-xl font-display font-bold text-text-primary cursor-pointer">
+            TK.
           </div>
-
-          {/* Desktop Navigation */}
+          
           <nav className="hidden md:flex space-x-8">
             {navigation.map((item) => (
-              <button
+              <a
                 key={item.name}
-                onClick={() => scrollToSection(item.href)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  activeSection === item.href.slice(1)
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
+                href={item.href}
+                onClick={(e) => scrollToSection(e, item.href)}
+                className={`text-sm font-medium transition-colors ${
+                  activeSection === item.href.substring(1) 
+                    ? 'text-blue-500 dark:text-blue-400' 
+                    : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
                 {item.name}
-              </button>
+              </a>
             ))}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200"
+              className="w-9 h-9 rounded-full flex items-center justify-center border border-border hover:border-border-hover text-text-secondary hover:text-text-primary transition-all"
+              aria-label="Toggle theme"
             >
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+            <a href="#contact" className="px-5 py-2 rounded-full bg-accent text-accent-text text-sm font-medium hover:bg-accent-muted transition-colors">
+              Hire Me
+            </a>
+          </div>
 
-            {/* Mobile menu button */}
+          <div className="md:hidden flex items-center space-x-3">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200"
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-full flex items-center justify-center border border-border text-text-secondary"
+              aria-label="Toggle theme"
             >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <button
+              className="text-text-secondary hover:text-text-primary"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
-              {navigation.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => scrollToSection(item.href)}
-                  className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    activeSection === item.href.slice(1)
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {item.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full px-6 pt-4">
+          <div className="glass-nav rounded-2xl p-4 flex flex-col space-y-4">
+            {navigation.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                onClick={(e) => scrollToSection(e, item.href)}
+                className={`font-medium px-4 py-2 rounded-lg transition-colors ${
+                  activeSection === item.href.substring(1)
+                    ? 'bg-blue-50 dark:bg-zinc-800 text-blue-600 dark:text-blue-400'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-border'
+                }`}
+              >
+                {item.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   );
 };

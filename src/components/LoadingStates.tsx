@@ -2,45 +2,45 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export const SkillCardSkeleton: React.FC = () => (
-  <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+  <div className="bg-white dark:bg-zinc-800 rounded-xl p-6 border border-zinc-200 dark:border-zinc-700">
     <div className="animate-pulse">
-      <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg mb-4"></div>
-      <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
-      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
+      <div className="w-16 h-16 bg-zinc-200 dark:bg-zinc-700 rounded-lg mb-4"></div>
+      <div className="h-6 bg-zinc-200 dark:bg-zinc-700 rounded mb-2"></div>
+      <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded mb-4"></div>
       <div className="space-y-2">
         <div className="flex justify-between">
-          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-20"></div>
-          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-12"></div>
+          <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-20"></div>
+          <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-12"></div>
         </div>
-        <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+        <div className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
       </div>
     </div>
   </div>
 );
 
 export const ProjectCardSkeleton: React.FC = () => (
-  <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+  <div className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
     <div className="animate-pulse">
-      <div className="w-full h-48 bg-slate-200 dark:bg-slate-700"></div>
+      <div className="w-full h-48 bg-zinc-200 dark:bg-zinc-700"></div>
       <div className="p-6">
-        <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
-        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
+        <div className="h-6 bg-zinc-200 dark:bg-zinc-700 rounded mb-2"></div>
+        <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded mb-4"></div>
         <div className="flex flex-wrap gap-2 mb-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-6 w-16 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+            <div key={i} className="h-6 w-16 bg-zinc-200 dark:bg-zinc-700 rounded-full"></div>
           ))}
         </div>
         <div className="space-y-2 mb-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-3 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            <div key={i} className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
           ))}
         </div>
-        <div className="flex justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex justify-between pt-4 border-t border-zinc-200 dark:border-zinc-700">
           <div className="flex space-x-4">
-            <div className="h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded"></div>
-            <div className="h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            <div className="h-4 w-12 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
+            <div className="h-4 w-12 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
           </div>
-          <div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded"></div>
+          <div className="h-4 w-16 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
         </div>
       </div>
     </div>
@@ -94,10 +94,10 @@ export const ErrorState: React.FC<{
         <line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
     </div>
-    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+    <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-2">
       Failed to load {type}
     </h3>
-    <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
+    <p className="text-zinc-600 dark:text-zinc-400 mb-6 max-w-md mx-auto">
       {message}
     </p>
     <button

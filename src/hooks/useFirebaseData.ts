@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export interface Skill {
   id: string;
   title: string;
   level: number;
+  yearsOfExperience: string;
+  specialties: string[];
   description: string;
   icon: string;
   color: string;
@@ -56,8 +58,19 @@ export interface Experience {
   position: string;
   period: string;
   description: string;
+  tech?: string[];
   current: boolean;
   order: number;
+  createdAt: Date;
+}
+
+export interface Message {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  read: boolean;
   createdAt: Date;
 }
 
@@ -78,32 +91,32 @@ export const useSkills = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const skillsRef = collection(db, 'skills');
-        const q = query(skillsRef, orderBy('order', 'asc'));
-        const querySnapshot = await getDocs(q);
-        const skillsData = querySnapshot.docs.map(doc => ({
+    console.log('[Firebase] Initializing public Skills listener...');
+    const skillsRef = collection(db, 'skills');
+    const q = query(skillsRef, orderBy('order', 'asc'));
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const skillsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Skill[];
         
+        console.log(`[Firebase] Public Skills sync: ${skillsData.length} items.`);
         setSkills(skillsData);
-      } catch (err) {
+        setLoading(false);
+      },
+      (err) => {
+        console.error('[Firebase] Public Skills sync error:', err);
         setError('Failed to fetch skills data');
-        console.error('Error fetching skills:', err);
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchSkills();
+    return () => unsubscribe();
   }, []);
 
-  return { skills, loading, error, refetch: () => window.location.reload() };
+  return { skills, loading, error };
 };
 
 export const useProjects = () => {
@@ -112,33 +125,33 @@ export const useProjects = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const projectsRef = collection(db, 'projects');
-        const q = query(projectsRef, orderBy('order', 'asc'));
-        const querySnapshot = await getDocs(q);
-        const projectsData = querySnapshot.docs.map(doc => ({
+    console.log('[Firebase] Initializing public Projects listener...');
+    const projectsRef = collection(db, 'projects');
+    const q = query(projectsRef, orderBy('order', 'asc'));
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const projectsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date()
         })) as Project[];
         
+        console.log(`[Firebase] Public Projects sync: ${projectsData.length} items.`);
         setProjects(projectsData);
-      } catch (err) {
+        setLoading(false);
+      },
+      (err) => {
+        console.error('[Firebase] Public Projects sync error:', err);
         setError('Failed to fetch projects data');
-        console.error('Error fetching projects:', err);
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchProjects();
+    return () => unsubscribe();
   }, []);
 
-  return { projects, loading, error, refetch: () => window.location.reload() };
+  return { projects, loading, error };
 };
 
 export const useTestimonials = () => {
@@ -147,33 +160,33 @@ export const useTestimonials = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTestimonials = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const testimonialsRef = collection(db, 'testimonials');
-        const q = query(testimonialsRef, orderBy('order', 'asc'));
-        const querySnapshot = await getDocs(q);
-        const testimonialsData = querySnapshot.docs.map(doc => ({
+    console.log('[Firebase] Initializing public Testimonials listener...');
+    const testimonialsRef = collection(db, 'testimonials');
+    const q = query(testimonialsRef, orderBy('order', 'asc'));
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const testimonialsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date()
         })) as Testimonial[];
         
+        console.log(`[Firebase] Public Testimonials sync: ${testimonialsData.length} items.`);
         setTestimonials(testimonialsData);
-      } catch (err) {
+        setLoading(false);
+      },
+      (err) => {
+        console.error('[Firebase] Public Testimonials sync error:', err);
         setError('Failed to fetch testimonials data');
-        console.error('Error fetching testimonials:', err);
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchTestimonials();
+    return () => unsubscribe();
   }, []);
 
-  return { testimonials, loading, error, refetch: () => window.location.reload() };
+  return { testimonials, loading, error };
 };
 
 export const useExperience = () => {
@@ -182,33 +195,33 @@ export const useExperience = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchExperience = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const experienceRef = collection(db, 'experience');
-        const q = query(experienceRef, orderBy('order', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const experienceData = querySnapshot.docs.map(doc => ({
+    console.log('[Firebase] Initializing public Experience listener...');
+    const experienceRef = collection(db, 'experience');
+    const q = query(experienceRef, orderBy('order', 'desc'));
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const experienceData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date()
         })) as Experience[];
         
+        console.log(`[Firebase] Public Experience sync: ${experienceData.length} items.`);
         setExperience(experienceData);
-      } catch (err) {
+        setLoading(false);
+      },
+      (err) => {
+        console.error('[Firebase] Public Experience sync error:', err);
         setError('Failed to fetch experience data');
-        console.error('Error fetching experience:', err);
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchExperience();
+    return () => unsubscribe();
   }, []);
 
-  return { experience, loading, error, refetch: () => window.location.reload() };
+  return { experience, loading, error };
 };
 
 export const useDashboardStats = () => {
@@ -226,50 +239,80 @@ export const useDashboardStats = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    console.log('[Firebase] Initializing Dashboard Stats sync...');
+    const collections = ['skills', 'projects', 'testimonials', 'experience'];
+    const unsubscribes: (() => void)[] = [];
+    
+    // Internal state to track counts
+    let currentStats = { ...stats };
 
-        // Fetch all collections
-        const [skillsSnapshot, projectsSnapshot, testimonialsSnapshot, experienceSnapshot] = await Promise.all([
-          getDocs(collection(db, 'skills')),
-          getDocs(collection(db, 'projects')),
-          getDocs(collection(db, 'testimonials')),
-          getDocs(collection(db, 'experience'))
-        ]);
+    collections.forEach(colName => {
+      const unsub = onSnapshot(collection(db, colName), (snapshot) => {
+        const size = snapshot.size;
+        
+        if (colName === 'skills') currentStats.totalSkills = size;
+        if (colName === 'projects') {
+          currentStats.totalProjects = size;
+          currentStats.featuredProjects = snapshot.docs.filter(d => d.data().featured).length;
+        }
+        if (colName === 'testimonials') {
+          currentStats.totalTestimonials = size;
+          const totalRatings = snapshot.docs.reduce((sum, d) => sum + (d.data().rating || 0), 0);
+          currentStats.averageRating = size > 0 ? Math.round((totalRatings / size) * 10) / 10 : 0;
+        }
+        if (colName === 'experience') currentStats.totalExperience = size;
 
-        const projects = projectsSnapshot.docs.map(doc => doc.data());
-        const testimonials = testimonialsSnapshot.docs.map(doc => doc.data());
+        // Simulate views/sessions
+        currentStats.portfolioViews = currentStats.portfolioViews || Math.floor(Math.random() * 5000) + 1000;
+        currentStats.activeSessions = currentStats.activeSessions || Math.floor(Math.random() * 50) + 10;
 
-        const featuredProjects = projects.filter(p => p.featured).length;
-        const totalRatings = testimonials.reduce((sum, t) => sum + (t.rating || 0), 0);
-        const averageRating = testimonials.length > 0 ? totalRatings / testimonials.length : 0;
-
-        // Simulate some dynamic stats
-        const portfolioViews = Math.floor(Math.random() * 5000) + 1000;
-        const activeSessions = Math.floor(Math.random() * 50) + 10;
-
-        setStats({
-          totalSkills: skillsSnapshot.size,
-          totalProjects: projectsSnapshot.size,
-          totalTestimonials: testimonialsSnapshot.size,
-          totalExperience: experienceSnapshot.size,
-          portfolioViews,
-          activeSessions,
-          featuredProjects,
-          averageRating: Math.round(averageRating * 10) / 10
-        });
-      } catch (err) {
-        setError('Failed to fetch dashboard stats');
-        console.error('Error fetching stats:', err);
-      } finally {
+        console.log(`[Firebase] Stats updated from ${colName}:`, currentStats);
+        setStats({ ...currentStats });
         setLoading(false);
-      }
-    };
+      }, (err) => {
+        console.error(`[Firebase] Stats sync error for ${colName}:`, err);
+        setError(`Failed to sync ${colName} stats`);
+      });
+      unsubscribes.push(unsub);
+    });
 
-    fetchStats();
+    return () => unsubscribes.forEach(unsub => unsub());
   }, []);
 
-  return { stats, loading, error, refetch: () => window.location.reload() };
+  return { stats, loading, error };
+};
+
+export const useMessages = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('[Firebase] Initializing global Messages listener...');
+    const messagesRef = collection(db, 'messages');
+    const q = query(messagesRef, orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const messagesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date()
+        })) as Message[];
+        
+        console.log(`[Firebase] Messages sync: ${messagesData.length} items.`);
+        setMessages(messagesData);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('[Firebase] Messages sync error:', err);
+        setError('Failed to fetch messages');
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  return { messages, loading, error };
 };
